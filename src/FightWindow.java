@@ -220,7 +220,7 @@ public class FightWindow implements ActionListener {
             d_defenders.setText("Defenders: " + defendingSoldiers);
         }
 
-        if(e.getActionCommand().equals("roll_dice") && (attackingSoldiers != 0 || defendingSoldiers != 0)) {
+        if(e.getActionCommand().equals("roll_dice") && (attackingSoldiers != 0 && defendingSoldiers != 0)) {
             fight();
         }
 
