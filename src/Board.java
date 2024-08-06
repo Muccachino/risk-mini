@@ -118,6 +118,14 @@ public class Board extends JFrame implements ActionListener {
         return boardConstraints;
     };
 
+    public void showHideNeighbors(String countryName, boolean show) {
+        String[] allNeighbors = countryNeighbors.get(countryName);
+
+        for (String neighbor : allNeighbors) {
+            allCountries.get(neighbor).setHighlight(show);
+        }
+    }
+
     private void addCountryNeighbors() {
         countryNeighbors.put("A1", new String[] {"A2", "A4"});
         countryNeighbors.put("A2", new String[] {"A1", "A3", "A5"});

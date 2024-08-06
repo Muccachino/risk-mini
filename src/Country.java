@@ -45,6 +45,14 @@ public class Country implements MouseListener {
         return panel;
     }
 
+    public void setHighlight(boolean on) {
+        if(on) {
+            panel.setBorder(BorderFactory.createLineBorder(Color.GREEN, 4));
+        } else {
+            panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        }
+    }
+
     public void updateCountryPanel() {
         soldierLabel.setText("Soldiers: " + this.soldiersInside);
         if(this.owner == Board.playerOne) {
@@ -261,8 +269,16 @@ public class Country implements MouseListener {
         }
 
     }
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
-    public void mousePressed(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {
+        //parent.showHideNeighbors(this.getName(), true);
+    }
+    public void mouseExited(MouseEvent e) {
+        //parent.showHideNeighbors(this.getName(), false);
+    }
+    public void mousePressed(MouseEvent e) {
+        parent.showHideNeighbors(this.getName(), true);
+    }
+    public void mouseReleased(MouseEvent e) {
+        parent.showHideNeighbors(this.getName(), false);
+    }
 }
