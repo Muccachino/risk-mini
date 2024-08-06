@@ -8,9 +8,9 @@ import java.util.Map;
 public class Board extends JFrame implements ActionListener {
     public static final int DICE_ROW_HEIGHT = 50;
     public static final int ROW_WIDTH_OUTSIDE = 250;
-    public static final int ROW_WIDTH_INSIDE = 500;
-    public static final int FIELD_WIDTH = 1000;
-    public static final int FIELD_HEIGHT = 500;
+    public static final int ROW_WIDTH_INSIDE = 700;
+    public static final int FIELD_WIDTH = 1200;
+    public static final int FIELD_HEIGHT = 700;
     public static final int STAT_ROW_HEIGHT = 50;
     public static String turn = "Player One's Turn";
     public static String phase = "Set Soldiers";
@@ -63,9 +63,13 @@ public class Board extends JFrame implements ActionListener {
         endTurnButton.setEnabled(false);
         JPanel allContinents = new JPanel(new GridLayout(2, 2));
         JPanel continentOne = createContinent("A");
+        continentOne.setBorder(BorderFactory.createLineBorder(Color.BLUE));
         JPanel continentTwo = createContinent("B");
+        continentTwo.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         JPanel continentThree = createContinent("C");
+        continentThree.setBorder(BorderFactory.createLineBorder(Color.RED));
         JPanel continentFour = createContinent("D");
+        continentFour.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
         allContinents.add(continentOne);
         allContinents.add(continentTwo);
         allContinents.add(continentThree);
@@ -157,6 +161,17 @@ public class Board extends JFrame implements ActionListener {
         return continent;
     }
 
+    public boolean allCountriesFilled() {
+        boolean allFilled = true;
+        for (Country c : allCountries.values()) {
+            if (c.getOwner() == null) {
+                allFilled = false;
+                break;
+            }
+        }
+        return allFilled;
+    }
+
     public boolean checkIfNeighbor(String countryName, String potentialNeighbor) {
         boolean neighborCheck = false;
         String[] neighbors = countryNeighbors.get(countryName);
@@ -205,6 +220,8 @@ public class Board extends JFrame implements ActionListener {
             allCountries.get(defendingCountry.getName()).addSoldiersInside(attackingCountry.getSoldiersInside() - 1);
             allCountries.get(attackingCountry.getName()).setSoldiersInside(1);
             currentPlayer.addCards(1);
+            playerOneCards.setText("Player One Cards: " + playerOne.getCards());
+            playerTwoCards.setText("Player Two Cards: " + playerTwo.getCards());
         }
 
         allCountries.get(attackingCountry.getName()).updateCountryPanel();
@@ -330,7 +347,6 @@ public class Board extends JFrame implements ActionListener {
     public static void main(String[] args) {
         Board board = new Board();
         board.setVisible(true);
-
     }
 
 }

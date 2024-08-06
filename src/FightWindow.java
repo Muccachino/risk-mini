@@ -149,11 +149,6 @@ public class FightWindow implements ActionListener {
         defenderDice.setText("Defender Roll: " + setLabelContent(d_dices));
 
         resolveDiceRolls(a_dices, d_dices);
-
-        System.out.println("Attackers left: " + attackingCountry.getSoldiersInside());
-        System.out.println("Defenders left: " + defendingCountry.getSoldiersInside());
-        System.out.println("Original1: " + Board.allCountries.get("C6").getSoldiersInside());
-        System.out.println("Original2: " + Board.allCountries.get("D4").getSoldiersInside());
     }
 
 

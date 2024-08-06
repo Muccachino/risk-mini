@@ -8,9 +8,8 @@ public class Player {
 
     public Player(String name) {
         this.name = name;
-        //TODO: Set Soldiers to correct amount
-        this.soldiers = 5;
-        this.cards = 3;
+        this.soldiers = 20;
+        this.cards = 0;
     }
 
     public String getName() {

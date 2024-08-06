@@ -12,6 +12,8 @@ public class Country implements MouseListener {
     private Board parent;
     JPanel panel;
     JLabel soldierLabel;
+    JLabel soldierIconLabel;
+    ImageIcon soldierIcon = new ImageIcon(System.getProperty("user.dir") + "\\src\\soldier_icon.png");
 
 
     public Country(String name, String continent, Board parent) {
@@ -23,13 +25,22 @@ public class Country implements MouseListener {
     }
 
     public JPanel draw() {
-        panel = new JPanel();
-        panel.add(new JLabel(this.name));
+        panel = new JPanel(new GridLayout(3,1));
+        panel.add(new JLabel(this.name, JLabel.CENTER));
+
         soldierLabel = new JLabel("Soldiers: " + this.soldiersInside);
+        soldierLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        soldierLabel.setVerticalAlignment(SwingConstants.TOP);
         panel.add(soldierLabel);
+
+        soldierIconLabel = new JLabel();
+        soldierIconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        soldierIconLabel.setVerticalAlignment(SwingConstants.TOP);
+        panel.add(soldierIconLabel);
+
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         panel.setOpaque(true);
-        panel.setBackground(Color.GREEN);
+        //panel.setBackground(Color.GREEN);
         panel.addMouseListener(this);
         return panel;
     }
@@ -53,12 +64,17 @@ public class Country implements MouseListener {
 
     public void addSoldiersInside(int soldiers) {
         this.soldiersInside += soldiers;
+        setSoldierIcons();
     }
 
     public void removeSoldiersInside(int soldiers) {
         this.soldiersInside -= soldiers;
+        setSoldierIcons();
     }
-    public void setSoldiersInside(int soldiers) { this.soldiersInside = soldiers; }
+    public void setSoldiersInside(int soldiers) {
+        this.soldiersInside = soldiers;
+        setSoldierIcons();
+    }
 
     public Player getOwner() {
         return this.owner;
@@ -84,24 +100,41 @@ public class Country implements MouseListener {
         this.soldiersSend = 0;
     }
 
+    public void setSoldierIcons() {
+        panel.remove(soldierIconLabel);
+        soldierIconLabel = new JLabel();
+        soldierIconLabel.setLayout(new GridLayout(2,10));
+        for (int i = 0; i < this.soldiersInside; i++) {
+            JLabel icon = new JLabel(soldierIcon);
+            soldierIconLabel.add(icon);
+        }
+        panel.add(soldierIconLabel);
+    }
+
     //TODO: Einfügen, dass erst alle Länder besetzt sein müssen, bevor man mehr Truppen drauf legen darf
     public void placeSoldiers() {
-        if(Board.turn.equals("Player One's Turn")){
+        if(Board.turn.equals("Player One's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())){
             this.owner = Board.playerOne;
             Board.playerOne.removeSoldiers(1);
-            this.soldiersInside++;
+            this.addSoldiersInside(1);
             soldierLabel.setText("Soldiers: " + this.soldiersInside);
             this.panel.setBackground(Color.YELLOW);
-        } else {
+            Board.turn = Board.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
+            Board.playerTurn.setText(Board.turn);
+            Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
+
+        } else if (Board.turn.equals("Player Two's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())) {
             this.owner = Board.playerTwo;
             Board.playerTwo.removeSoldiers(1);
-            this.soldiersInside++;
+            this.addSoldiersInside(1);
             soldierLabel.setText("Soldiers: " + this.soldiersInside);
             this.panel.setBackground(Color.PINK);
+            Board.turn = Board.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
+            Board.playerTurn.setText(Board.turn);
+            Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
+
         }
-        Board.turn = Board.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
-        Board.playerTurn.setText(Board.turn);
-        Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
+
 
         if(Board.playerTwo.getSoldiers() == 0) {
             Board.phase = "Attack Phase";
@@ -111,7 +144,7 @@ public class Country implements MouseListener {
     }
 
     public void attackPhase() {
-        if(Board.attackingCountry == null && this.getOwner() == Board.currentPlayer) {
+        if(Board.attackingCountry == null && this.getOwner() == Board.currentPlayer && this.getSoldiersInside() > 1) {
             Board.attackingCountry = this;
             this.panel.setBackground(Color.CYAN);
         } else if (Board.attackingCountry != null && Board.attackingCountry.getName().equals(this.getName())) {
@@ -139,7 +172,7 @@ public class Country implements MouseListener {
 
     public void playerOneSetCardTroops() {
         Board.playerOne.removeSoldiers(1);
-        this.soldiersInside++;
+        this.addSoldiersInside(1);
         soldierLabel.setText("Soldiers: " + this.soldiersInside);
         if(Board.playerOne.getSoldiers() == 0) {
             Board.phase = "Attack Phase";
@@ -151,7 +184,7 @@ public class Country implements MouseListener {
 
     public void playerTwoSetCardTroops() {
         Board.playerTwo.removeSoldiers(1);
-        this.soldiersInside++;
+        this.addSoldiersInside(1);
         soldierLabel.setText("Soldiers: " + this.soldiersInside);
         if(Board.playerTwo.getSoldiers() == 0) {
             Board.phase = "Attack Phase";
@@ -162,7 +195,7 @@ public class Country implements MouseListener {
     }
 
     public void fortification() {
-        if(Board.sendingCountry == null) {
+        if(Board.sendingCountry == null && this.getSoldiersInside() > 1) {
             Board.sendingCountry = this;
             this.panel.setBackground(Color.MAGENTA);
         } else if (Board.sendingCountry.getName().equals(this.getName())) {
@@ -172,7 +205,9 @@ public class Country implements MouseListener {
             } else {
                 this.panel.setBackground(Color.PINK);
             }
-        } else if (Board.receivingCountry == null) {
+        } else if (Board.receivingCountry == null &&
+                    parent.checkIfNeighbor(Board.sendingCountry.getName(), this.getName()) &&
+                    Board.sendingCountry.getOwner() == this.getOwner()) {
             Board.receivingCountry = this;
             parent.openSendArmiesWindow();
         }
