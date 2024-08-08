@@ -14,11 +14,6 @@ public class FightWindow implements ActionListener {
     GridBagConstraints fightConstraints = new GridBagConstraints();
     JPanel fightPanel = new JPanel(fightLayout);
 
-    private Board parent;
-    private Country attackingCountry;
-    private Country defendingCountry;
-    private int attackingSoldiers;
-    private int defendingSoldiers;
     JDialog frame;
     JLabel a_soldiers;
     JLabel a_attackers;
@@ -26,6 +21,12 @@ public class FightWindow implements ActionListener {
     JLabel d_defenders;
     JLabel attackerDice;
     JLabel defenderDice;
+
+    private Board parent;
+    private Country attackingCountry;
+    private Country defendingCountry;
+    private int attackingSoldiers;
+    private int defendingSoldiers;
 
 
     public FightWindow(Country attackingCountry, Country defendingCountry, Board parent) {

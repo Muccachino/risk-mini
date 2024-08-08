@@ -24,7 +24,7 @@ public class Country implements MouseListener {
         this.parent = parent;
     }
 
-    public JPanel draw() {
+    public JPanel draw(Color borderColor) {
         panel = new JPanel(new GridLayout(3,1));
         panel.add(new JLabel(this.name, JLabel.CENTER));
 
@@ -38,9 +38,9 @@ public class Country implements MouseListener {
         soldierIconLabel.setVerticalAlignment(SwingConstants.TOP);
         panel.add(soldierIconLabel);
 
-        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        panel.setBorder(BorderFactory.createLineBorder(borderColor, 3));
         panel.setOpaque(true);
-        //panel.setBackground(Color.GREEN);
+
         panel.addMouseListener(this);
         return panel;
     }
@@ -49,7 +49,13 @@ public class Country implements MouseListener {
         if(on) {
             panel.setBorder(BorderFactory.createLineBorder(Color.GREEN, 4));
         } else {
-            panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            switch (this.continent) {
+                case "A" -> panel.setBorder(BorderFactory.createLineBorder(new Color(249,225,68), 3));
+                case "B" -> panel.setBorder(BorderFactory.createLineBorder(new Color(241,115,115),3));
+                case "C" -> panel.setBorder(BorderFactory.createLineBorder(new Color(99,189,89),3));
+                case "D" -> panel.setBorder(BorderFactory.createLineBorder(new Color(67,80,156),3));
+                default -> panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            };
         }
     }
 
@@ -119,7 +125,6 @@ public class Country implements MouseListener {
         panel.add(soldierIconLabel);
     }
 
-    //TODO: Einfügen, dass erst alle Länder besetzt sein müssen, bevor man mehr Truppen drauf legen darf
     public void placeSoldiers() {
         if(Board.turn.equals("Player One's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())){
             this.owner = Board.playerOne;
@@ -223,50 +228,53 @@ public class Country implements MouseListener {
 
 
     public void mouseClicked(MouseEvent e) {
+        if(SwingUtilities.isLeftMouseButton(e)) {
 
-        if(Board.phase.equals("Set Soldiers") && (this.owner == null || this.owner == Board.currentPlayer)) {
-            placeSoldiers();
-        }
-        else if(Board.phase.equals("Attack Phase")){
-            attackPhase();
-        }
-        else if (Board.phase.equals("Player One: Set Soldiers") && this.getOwner() == Board.playerOne) {
-            playerOneSetCardTroops();
-        }
-        else if (Board.phase.equals("Player Two: Set Soldiers") && this.getOwner() == Board.playerTwo) {
-           playerTwoSetCardTroops();
-        }
-        else if (Board.phase.equals("Fortification Phase")) {
-            fortification();
-        }
-        else if (Board.phase.equals("New Troops Phase")) {
-            if(this.owner == Board.currentPlayer) {
-                this.addSoldiersInside(1);
-                Board.currentPlayer.removeSoldiers(1);
-                soldierLabel.setText("Soldiers: " + this.soldiersInside);
-                Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
+            if(Board.phase.equals("Set Soldiers") && (this.owner == null || this.owner == Board.currentPlayer)) {
+                placeSoldiers();
+            }
+            else if(Board.phase.equals("Attack Phase")){
+                attackPhase();
+            }
+            else if (Board.phase.equals("Player One: Set Soldiers") && this.getOwner() == Board.playerOne) {
+                playerOneSetCardTroops();
+            }
+            else if (Board.phase.equals("Player Two: Set Soldiers") && this.getOwner() == Board.playerTwo) {
+                playerTwoSetCardTroops();
+            }
+            else if (Board.phase.equals("Fortification Phase")) {
+                fortification();
+            }
+            else if (Board.phase.equals("New Troops Phase")) {
+                if(this.owner == Board.currentPlayer) {
+                    this.addSoldiersInside(1);
+                    Board.currentPlayer.removeSoldiers(1);
+                    soldierLabel.setText("Soldiers: " + this.soldiersInside);
+                    Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
 
-                if(Board.currentPlayer == Board.playerOne && Board.playerOne.getSoldiers() == 0 && Board.playerTwo.getSoldiers() != 0) {
-                    Board.currentPlayer = Board.playerTwo;
-                    Board.turn = Board.currentPlayer.getName() + "'s Turn";
-                    Board.playerTurn.setText(Board.turn);
-                    Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
-                }
-                else if(Board.currentPlayer == Board.playerTwo && Board.playerTwo.getSoldiers() == 0 && Board.playerOne.getSoldiers() != 0) {
-                    Board.currentPlayer = Board.playerOne;
-                    Board.turn = Board.currentPlayer.getName() + "'s Turn";
-                    Board.playerTurn.setText(Board.turn);
-                    Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
-                }
-                else if(Board.playerOne.getSoldiers() == 0 && Board.playerTwo.getSoldiers() == 0) {
-                    Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
-                    Board.turn = Board.currentPlayer.getName() + "'s Turn";
-                    Board.playerTurn.setText(Board.turn);
-                    Board.phase = "Attack Phase";
-                    Board.currentPhase.setText(Board.phase);
+                    if(Board.currentPlayer == Board.playerOne && Board.playerOne.getSoldiers() == 0 && Board.playerTwo.getSoldiers() != 0) {
+                        Board.currentPlayer = Board.playerTwo;
+                        Board.turn = Board.currentPlayer.getName() + "'s Turn";
+                        Board.playerTurn.setText(Board.turn);
+                        Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
+                    }
+                    else if(Board.currentPlayer == Board.playerTwo && Board.playerTwo.getSoldiers() == 0 && Board.playerOne.getSoldiers() != 0) {
+                        Board.currentPlayer = Board.playerOne;
+                        Board.turn = Board.currentPlayer.getName() + "'s Turn";
+                        Board.playerTurn.setText(Board.turn);
+                        Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
+                    }
+                    else if(Board.playerOne.getSoldiers() == 0 && Board.playerTwo.getSoldiers() == 0) {
+                        Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
+                        Board.turn = Board.currentPlayer.getName() + "'s Turn";
+                        Board.playerTurn.setText(Board.turn);
+                        Board.phase = "Attack Phase";
+                        Board.currentPhase.setText(Board.phase);
+                    }
                 }
             }
         }
+
 
     }
     public void mouseEntered(MouseEvent e) {
@@ -276,9 +284,13 @@ public class Country implements MouseListener {
         //parent.showHideNeighbors(this.getName(), false);
     }
     public void mousePressed(MouseEvent e) {
-        parent.showHideNeighbors(this.getName(), true);
+        if(SwingUtilities.isRightMouseButton(e)){
+            parent.showHideNeighbors(this.getName(), true);
+        }
     }
     public void mouseReleased(MouseEvent e) {
-        parent.showHideNeighbors(this.getName(), false);
+        if(SwingUtilities.isRightMouseButton(e)){
+            parent.showHideNeighbors(this.getName(), false);
+        }
     }
 }

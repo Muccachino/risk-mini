@@ -16,7 +16,6 @@ public class SendArmies implements ActionListener {
     JSpinner soldiersSend;
     JButton sendButton;
     JButton cancelButton;
-    int soldiers = 0;
 
     private Board parent;
     private Country sendingCountry;
@@ -37,11 +36,12 @@ public class SendArmies implements ActionListener {
         sendLayout.rowHeights = new int[] {QUESTION_HEIGHT, INPUT_HEIGHT, BUTTON_HEIGHT};
 
         JLabel question = new JLabel("How many soldiers do you want to send from " + this.sendingCountry.getName() + " to " + this.receivingCountry.getName() + " ?");
+
         JPanel soldiersPanel = new JPanel(new FlowLayout());
         soldiersSend = new JSpinner(new SpinnerNumberModel(1, 1, sendingCountry.getSoldiersInside() - 1, 1));
         soldiersSend.setSize(100, 100);
-        //soldiersSend.addChangeListener(e -> soldiers = (int) soldiersSend.getValue());
         soldiersPanel.add(soldiersSend);
+
         JPanel buttonPanel = new JPanel();
         sendButton = new JButton("Send");
         sendButton.addActionListener(this);
@@ -74,8 +74,7 @@ public class SendArmies implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("send")) {
             sendingCountry.setSoldiersSend((int)soldiersSend.getValue());
-            System.out.println("Soldiers Send: " + sendingCountry.getSoldiersSend());
-            parent.fortificateCountry();
+            parent.fortifyCountry();
             dialog.dispose();
         }
         else if(e.getActionCommand().equals("cancel")) {
