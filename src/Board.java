@@ -12,32 +12,36 @@ public class Board extends JFrame implements ActionListener {
     public static final int FIELD_WIDTH = 1200;
     public static final int FIELD_HEIGHT = 800;
     public static final int STAT_ROW_HEIGHT = 50;
-    public static String turn = "Player One's Turn";
-    public static String phase = "Set Soldiers";
-    public static Player playerOne = new Player("Player One");
-    public static Player playerTwo = new Player("Player Two");
-    public static Player currentPlayer = playerOne;
-    public static JLabel playerTurn;
-    public static JLabel currentPhase;
-    public static JButton attackButton;
-    public static JButton endTurnButton;
+
+    public String turn = "Player One's Turn";
+    public JLabel playerTurn;
+
+    public String phase = "Set Soldiers";
+    public JLabel currentPhase;
+
+    public Player playerOne = new Player("Player One");
+    public Player playerTwo = new Player("Player Two");
+    public Player currentPlayer = playerOne;
+
+    public JButton attackButton;
+    public JButton endTurnButton;
 
     JButton playerOneCards;
     JButton playerTwoCards;
     int fortifications = 3;
 
+    public Country attackingCountry;
+    public Country defendingCountry;
 
-    public static Country attackingCountry;
-    public static Country defendingCountry;
+    public Country sendingCountry;
+    public Country receivingCountry;
 
-    public static Country sendingCountry;
-    public static Country receivingCountry;
+    public Map<String, Country> allCountries = new HashMap<>();
+    public Map<String, String[]> countryNeighbors = new HashMap<>();
+
     GridBagLayout boardLayout = new GridBagLayout();
     GridBagConstraints boardConstraints = new GridBagConstraints();
     JPanel boardPanel = new JPanel(boardLayout);
-
-    public static Map<String, Country> allCountries = new HashMap<>();
-    public static Map<String, String[]> countryNeighbors = new HashMap<>();
 
     private String boardChoice;
 
@@ -51,7 +55,7 @@ public class Board extends JFrame implements ActionListener {
         boardLayout.columnWidths = new int[] {ROW_WIDTH_OUTSIDE, ROW_WIDTH_INSIDE, ROW_WIDTH_OUTSIDE};
         boardLayout.rowHeights = new int[] {DICE_ROW_HEIGHT, FIELD_HEIGHT, STAT_ROW_HEIGHT};
 
-
+        // Top row of game board
         playerTurn = new JLabel(turn, JLabel.CENTER);
         playerTurn.setOpaque(true);
         playerTurn.setBackground(Color.BLUE);
@@ -66,31 +70,28 @@ public class Board extends JFrame implements ActionListener {
         endTurnButton.setActionCommand("End Phase");
         endTurnButton.setEnabled(false);
 
+        // Game Board creation depending on choice in Start Window
         JPanel allContinents = new JPanel();
-        if(this.boardChoice.equals("board1")){
-            allContinents = new JPanel(new GridLayout(2, 2));
-            JPanel continentOne = createContinent("A");
-            continentOne.setBorder(BorderFactory.createLineBorder(Color.BLUE));
-            JPanel continentTwo = createContinent("B");
-            continentTwo.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-            JPanel continentThree = createContinent("C");
-            continentThree.setBorder(BorderFactory.createLineBorder(Color.RED));
-            JPanel continentFour = createContinent("D");
-            continentFour.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
-            allContinents.add(continentOne);
-            allContinents.add(continentTwo);
-            allContinents.add(continentThree);
-            allContinents.add(continentFour);
-        }
-        else if(this.boardChoice.equals("board2")){
-            allContinents = new Board2().createContinents2(allCountries, this);
+        switch (this.boardChoice) {
+            case "board1" -> {
+                GameBoard1 gameBoard1 = new GameBoard1();
+                allContinents = new JPanel(new GridLayout(2, 2));
+                JPanel continentOne = gameBoard1.createContinent("A", allCountries, this);
+                JPanel continentTwo = gameBoard1.createContinent("B", allCountries, this);
+                JPanel continentThree = gameBoard1.createContinent("C", allCountries, this);
+                JPanel continentFour = gameBoard1.createContinent("D", allCountries, this);
 
-        }
-        else if(this.boardChoice.equals("board3")){
-            allContinents = new Board3().createContinents3(allCountries, this);
+                allContinents.add(continentOne);
+                allContinents.add(continentTwo);
+                allContinents.add(continentThree);
+                allContinents.add(continentFour);
+            }
+            case "board2" -> allContinents = new GameBoard2().createContinents2(allCountries, this);
+            case "board3" -> allContinents = new GameBoard3().createContinents3(allCountries, this);
         }
         allContinents.setBackground(new Color(153,204,255));
 
+        // Bottom row of game board
         playerOneCards = new JButton("Player One Cards: " + playerOne.getCards());
         playerOneCards.setBackground(Color.ORANGE);
         playerOneCards.setOpaque(true);
@@ -122,10 +123,11 @@ public class Board extends JFrame implements ActionListener {
 
         pack();
 
+        // Choosing correct neighbor references for game board
         switch (boardChoice) {
-            case "board1" -> addCountryNeighbors();
-            case "board2" -> Board2.addCountryNeighbors2(countryNeighbors);
-            case "board3" -> Board3.addCountryNeighbors3(countryNeighbors);
+            case "board1" -> GameBoard1.addCountryNeighbors(countryNeighbors);
+            case "board2" -> GameBoard2.addCountryNeighbors2(countryNeighbors);
+            case "board3" -> GameBoard3.addCountryNeighbors3(countryNeighbors);
         }
 
     }
@@ -139,56 +141,8 @@ public class Board extends JFrame implements ActionListener {
         return constraints;
     };
 
-    private JPanel createContinent(String name) {
-        JPanel continent = new JPanel(new GridLayout(2, 3));
 
-        for (int i = 1; i <= 6; i++) {
-            Country c = new Country(name + i, name, this);
-            allCountries.put(c.getName(), c);
-            JPanel country = switch (name) {
-                case "A" -> c.draw(new Color(249,225,68));
-                case "B" -> c.draw(new Color(241,115,115));
-                case "C" -> c.draw(new Color(99,189,89));
-                case "D" -> c.draw(new Color(67,80,156));
-                default -> c.draw(Color.BLACK);
-            };
-
-            continent.add(country, CENTER_ALIGNMENT);
-        }
-
-        return continent;
-    }
-
-    private void addCountryNeighbors() {
-        countryNeighbors.put("A1", new String[] {"A2", "A4"});
-        countryNeighbors.put("A2", new String[] {"A1", "A3", "A5"});
-        countryNeighbors.put("A3", new String[] {"A2", "A6", "B1"});
-        countryNeighbors.put("A4", new String[] {"A1", "A5", "C1"});
-        countryNeighbors.put("A5", new String[] {"A2", "A4", "A6", "C2"});
-        countryNeighbors.put("A6", new String[] {"A3", "A5", "B4", "C3"});
-
-        countryNeighbors.put("B1", new String[] {"A3", "B2", "B4"});
-        countryNeighbors.put("B2", new String[] {"B1", "B3", "B5"});
-        countryNeighbors.put("B3", new String[] {"B2", "B6"});
-        countryNeighbors.put("B4", new String[] {"B1", "B5", "A6", "D1"});
-        countryNeighbors.put("B5", new String[] {"B2", "B4", "B6", "D2"});
-        countryNeighbors.put("B6", new String[] {"B3", "B5", "D3"});
-
-        countryNeighbors.put("C1", new String[] {"C2", "C4", "A4"});
-        countryNeighbors.put("C2", new String[] {"C1", "C3", "C5", "A5"});
-        countryNeighbors.put("C3", new String[] {"C2", "C6", "A6", "D1"});
-        countryNeighbors.put("C4", new String[] {"C1", "C5"});
-        countryNeighbors.put("C5", new String[] {"C2", "C4", "C6"});
-        countryNeighbors.put("C6", new String[] {"C3", "C5", "D4"});
-
-        countryNeighbors.put("D1", new String[] {"D2", "D4", "B4", "C3"});
-        countryNeighbors.put("D2", new String[] {"D1", "D3", "D5", "B5"});
-        countryNeighbors.put("D3", new String[] {"D2", "D6", "B6"});
-        countryNeighbors.put("D4", new String[] {"D1", "D5", "C6"});
-        countryNeighbors.put("D5", new String[] {"D2", "D4", "D6"});
-        countryNeighbors.put("D6", new String[] {"D3", "D5"});
-    }
-
+    // Highlights a country's neighbors, which can be attacked
     public void showHideNeighbors(String countryName, boolean show) {
         String[] allNeighbors = countryNeighbors.get(countryName);
 
@@ -197,7 +151,7 @@ public class Board extends JFrame implements ActionListener {
         }
     }
 
-
+    // Checks if all available countries have been chosen at beginning of game
     public boolean allCountriesFilled() {
         boolean allFilled = true;
         for (Country c : allCountries.values()) {
@@ -208,6 +162,7 @@ public class Board extends JFrame implements ActionListener {
         }
         return allFilled;
     }
+
 
     public boolean checkIfNeighbor(String countryName, String potentialNeighbor) {
         boolean neighborCheck = false;
@@ -221,6 +176,7 @@ public class Board extends JFrame implements ActionListener {
         return neighborCheck;
     }
 
+    // Checks if a player owns one or more whole continent (for New Troops Phase)
     public int checkOwningContinents(Player player) {
         int continentsOwned = 0;
         int contA = 0;
@@ -251,21 +207,26 @@ public class Board extends JFrame implements ActionListener {
         return continentsOwned;
     }
 
+    // Updates the state of the countries after an attack
     public void updatePanels() {
+        // Check if an attack was successful
         if(allCountries.get(defendingCountry.getName()).getSoldiersInside() == 0) {
             allCountries.get(defendingCountry.getName()).setOwner(attackingCountry.getOwner());
             allCountries.get(defendingCountry.getName()).addSoldiersInside(attackingCountry.getSoldiersInside() - 1);
             allCountries.get(attackingCountry.getName()).setSoldiersInside(1);
+
             currentPlayer.addCards(1);
             playerOneCards.setText("Player One Cards: " + playerOne.getCards());
             playerTwoCards.setText("Player Two Cards: " + playerTwo.getCards());
         }
 
+        // Colors of countries will be set to their owners color
         allCountries.get(attackingCountry.getName()).updateCountryPanel();
         allCountries.get(defendingCountry.getName()).updateCountryPanel();
 
         checkWin();
 
+        // If player has more than 5 cards, he is forced to use them
         if(currentPlayer.getCards() > 5) {
             if(currentPlayer == playerOne) {
                 playerOne.cardsToSoldiers();
@@ -285,11 +246,13 @@ public class Board extends JFrame implements ActionListener {
         defendingCountry = null;
     }
 
+    // Opens the Send Armies Window in the Fortification Phase
     public void openSendArmiesWindow() {
         SendArmies sendArmies = new SendArmies(sendingCountry, receivingCountry, this);
         sendArmies.createSendWindow();
     }
 
+    // Updates the countries after soldiers have been sent around
     public void fortifyCountry() {
         allCountries.get(receivingCountry.getName()).addSoldiersInside(sendingCountry.getSoldiersSend());
         allCountries.get(sendingCountry.getName()).removeSoldiersInside(sendingCountry.getSoldiersSend());
@@ -298,6 +261,7 @@ public class Board extends JFrame implements ActionListener {
         allCountries.get(sendingCountry.getName()).updateCountryPanel();
         allCountries.get(receivingCountry.getName()).updateCountryPanel();
 
+        // After the set amount of sending, the players turn end automatically
         fortifications--;
         if(fortifications == 0) {
             endTurn();
@@ -308,6 +272,7 @@ public class Board extends JFrame implements ActionListener {
         receivingCountry = null;
     }
 
+    // Calculates the new Troops at the beginning of a turn, depending on owned countries and continents
     public void getNewTroops(Player player) {
         int newTroops = 0;
         int countriesOwned = 0;

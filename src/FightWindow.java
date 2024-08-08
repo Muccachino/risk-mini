@@ -134,22 +134,23 @@ public class FightWindow implements ActionListener {
         return defendingCountry.getSoldiersInside() - defenders >= 0;
     }
 
+    // Rolls a die for every attacker and defender and sorts them from high to low
     public void fight() {
-        Integer[] a_dices = new Integer[attackingSoldiers];
+        Integer[] a_dice = new Integer[attackingSoldiers];
         for (int i = 0; i < attackingSoldiers; i++) {
-            a_dices[i] = rollDice();
+            a_dice[i] = rollDice();
         }
-        Arrays.sort(a_dices, Collections.reverseOrder());
-        attackerDice.setText("Attacker Roll: " + setLabelContent(a_dices));
+        Arrays.sort(a_dice, Collections.reverseOrder());
+        attackerDice.setText("Attacker Roll: " + setLabelContent(a_dice));
 
-        Integer[] d_dices = new Integer[defendingSoldiers];
+        Integer[] d_dice = new Integer[defendingSoldiers];
         for (int i = 0; i < defendingSoldiers; i++) {
-            d_dices[i] = rollDice();
+            d_dice[i] = rollDice();
         }
-        Arrays.sort(d_dices, Collections.reverseOrder());
-        defenderDice.setText("Defender Roll: " + setLabelContent(d_dices));
+        Arrays.sort(d_dice, Collections.reverseOrder());
+        defenderDice.setText("Defender Roll: " + setLabelContent(d_dice));
 
-        resolveDiceRolls(a_dices, d_dices);
+        resolveDiceRolls(a_dice, d_dice);
     }
 
 
@@ -157,6 +158,7 @@ public class FightWindow implements ActionListener {
         return (int)(Math.random() * 6) + 1;
     }
 
+    // Converts all dice values to a string for the output label
     public String setLabelContent(Integer[] rolls) {
         StringBuilder labelContent = new StringBuilder();
         for (int i = 0; i < rolls.length; i++) {
@@ -170,6 +172,7 @@ public class FightWindow implements ActionListener {
         return labelContent.toString();
     }
 
+    // Compares attacker and defender dice values and resets variables for next fight
     public void resolveDiceRolls(Integer[] attackerDices, Integer[] defenderDices) {
         int attackerLosses = 0;
         int defenderLosses = 0;

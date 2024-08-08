@@ -24,7 +24,7 @@ public class Country implements MouseListener {
         this.parent = parent;
     }
 
-    public JPanel draw(Color borderColor) {
+    public JPanel createCountry(Color borderColor) {
         panel = new JPanel(new GridLayout(3,1));
         panel.add(new JLabel(this.name, JLabel.CENTER));
 
@@ -45,6 +45,7 @@ public class Country implements MouseListener {
         return panel;
     }
 
+    // Sets correct border color for and after highlighting it
     public void setHighlight(boolean on) {
         if(on) {
             panel.setBorder(BorderFactory.createLineBorder(Color.GREEN, 4));
@@ -59,9 +60,10 @@ public class Country implements MouseListener {
         }
     }
 
+
     public void updateCountryPanel() {
         soldierLabel.setText("Soldiers: " + this.soldiersInside);
-        if(this.owner == Board.playerOne) {
+        if(this.owner == parent.playerOne) {
             panel.setBackground(Color.YELLOW);
         } else {
             panel.setBackground(Color.PINK);
@@ -125,104 +127,138 @@ public class Country implements MouseListener {
         panel.add(soldierIconLabel);
     }
 
+    // Places a soldier and claims the country for the current player at the beginning of the game
     public void placeSoldiers() {
-        if(Board.turn.equals("Player One's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())){
-            this.owner = Board.playerOne;
-            Board.playerOne.removeSoldiers(1);
+        if(parent.turn.equals("Player One's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())){
+            this.owner = parent.playerOne;
+            parent.playerOne.removeSoldiers(1);
             this.addSoldiersInside(1);
             soldierLabel.setText("Soldiers: " + this.soldiersInside);
             this.panel.setBackground(Color.YELLOW);
-            Board.turn = Board.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
-            Board.playerTurn.setText(Board.turn);
-            Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
+            parent.turn = parent.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
+            parent.playerTurn.setText(parent.turn);
+            parent.currentPlayer = parent.currentPlayer == parent.playerOne ? parent.playerTwo : parent.playerOne;
 
-        } else if (Board.turn.equals("Player Two's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())) {
-            this.owner = Board.playerTwo;
-            Board.playerTwo.removeSoldiers(1);
+        } else if (parent.turn.equals("Player Two's Turn") && (this.getSoldiersInside() == 0 || parent.allCountriesFilled())) {
+            this.owner = parent.playerTwo;
+            parent.playerTwo.removeSoldiers(1);
             this.addSoldiersInside(1);
             soldierLabel.setText("Soldiers: " + this.soldiersInside);
             this.panel.setBackground(Color.PINK);
-            Board.turn = Board.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
-            Board.playerTurn.setText(Board.turn);
-            Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
+            parent.turn = parent.turn.equals("Player One's Turn") ? "Player Two's Turn" : "Player One's Turn";
+            parent.playerTurn.setText(parent.turn);
+            parent.currentPlayer = parent.currentPlayer == parent.playerOne ? parent.playerTwo : parent.playerOne;
 
         }
 
-
-        if(Board.playerTwo.getSoldiers() == 0) {
-            Board.phase = "Attack Phase";
-            Board.currentPhase.setText(Board.phase);
-            Board.endTurnButton.setEnabled(true);
+        // Switches to next phase when the players have no more soldiers to place
+        if(parent.playerTwo.getSoldiers() == 0) {
+            parent.phase = "Attack Phase";
+            parent.currentPhase.setText(parent.phase);
+            parent.endTurnButton.setEnabled(true);
         }
     }
 
+    // Setting / Unsetting an attacking and defending country for the Attack Phase
     public void attackPhase() {
-        if(Board.attackingCountry == null && this.getOwner() == Board.currentPlayer && this.getSoldiersInside() > 1) {
-            Board.attackingCountry = this;
+        if(parent.attackingCountry == null && this.getOwner() == parent.currentPlayer && this.getSoldiersInside() > 1) {
+            parent.attackingCountry = this;
             this.panel.setBackground(Color.CYAN);
-        } else if (Board.attackingCountry != null && Board.attackingCountry.getName().equals(this.getName())) {
-            Board.attackingCountry = null;
-            if (Board.currentPlayer == Board.playerOne) {
+        } else if (parent.attackingCountry != null && parent.attackingCountry.getName().equals(this.getName())) {
+            parent.attackingCountry = null;
+            if (parent.currentPlayer == parent.playerOne) {
                 this.panel.setBackground(Color.YELLOW);
             } else {
                 this.panel.setBackground(Color.PINK);
             }
-            Board.attackButton.setEnabled(false);
-        } else if (Board.attackingCountry != null && Board.defendingCountry == null && parent.checkIfNeighbor(Board.attackingCountry.getName(), this.getName())) {
-            Board.defendingCountry = this;
+            parent.attackButton.setEnabled(false);
+        } else if (parent.attackingCountry != null && parent.defendingCountry == null && parent.checkIfNeighbor(parent.attackingCountry.getName(), this.getName())) {
+            parent.defendingCountry = this;
             this.panel.setBackground(Color.RED);
-            Board.attackButton.setEnabled(true);
-        } else if (Board.defendingCountry != null && Board.defendingCountry.getName().equals(this.getName())) {
-            Board.defendingCountry = null;
-            if (Board.currentPlayer == Board.playerOne) {
+            parent.attackButton.setEnabled(true);
+        } else if (parent.defendingCountry != null && parent.defendingCountry.getName().equals(this.getName())) {
+            parent.defendingCountry = null;
+            if (parent.currentPlayer == parent.playerOne) {
                 this.panel.setBackground(Color.PINK);
             } else {
                 this.panel.setBackground(Color.YELLOW);
             }
-            Board.attackButton.setEnabled(false);
+            parent.attackButton.setEnabled(false);
         }
     }
 
+    // Updates country when player uses soldiers he gained from cards
     public void playerOneSetCardTroops() {
-        Board.playerOne.removeSoldiers(1);
+        parent.playerOne.removeSoldiers(1);
         this.addSoldiersInside(1);
         soldierLabel.setText("Soldiers: " + this.soldiersInside);
-        if(Board.playerOne.getSoldiers() == 0) {
-            Board.phase = "Attack Phase";
-            Board.currentPhase.setText(Board.phase);
+        if(parent.playerOne.getSoldiers() == 0) {
+            parent.phase = "Attack Phase";
+            parent.currentPhase.setText(parent.phase);
         } else {
-            Board.currentPhase.setText("Player One: Set " + Board.playerOne.getSoldiers() + " Soldier(s)");
+            parent.currentPhase.setText("Player One: Set " + parent.playerOne.getSoldiers() + " Soldier(s)");
         }
     }
 
     public void playerTwoSetCardTroops() {
-        Board.playerTwo.removeSoldiers(1);
+        parent.playerTwo.removeSoldiers(1);
         this.addSoldiersInside(1);
         soldierLabel.setText("Soldiers: " + this.soldiersInside);
-        if(Board.playerTwo.getSoldiers() == 0) {
-            Board.phase = "Attack Phase";
-            Board.currentPhase.setText(Board.phase);
+        if(parent.playerTwo.getSoldiers() == 0) {
+            parent.phase = "Attack Phase";
+            parent.currentPhase.setText(parent.phase);
         } else {
-            Board.currentPhase.setText("Player Two: Set " + Board.playerTwo.getSoldiers() + " Soldier(s)");
+            parent.currentPhase.setText("Player Two: Set " + parent.playerTwo.getSoldiers() + " Soldier(s)");
         }
     }
 
+    // Setting / Unsetting a sending and receiving country and opening the Send Armies Window
     public void fortification() {
-        if(Board.sendingCountry == null && this.getSoldiersInside() > 1) {
-            Board.sendingCountry = this;
+        if(parent.sendingCountry == null && this.getSoldiersInside() > 1) {
+            parent.sendingCountry = this;
             this.panel.setBackground(Color.MAGENTA);
-        } else if (Board.sendingCountry.getName().equals(this.getName())) {
-            Board.sendingCountry = null;
-            if (Board.currentPlayer == Board.playerOne) {
+        } else if (parent.sendingCountry.getName().equals(this.getName())) {
+            parent.sendingCountry = null;
+            if (parent.currentPlayer == parent.playerOne) {
                 this.panel.setBackground(Color.YELLOW);
             } else {
                 this.panel.setBackground(Color.PINK);
             }
-        } else if (Board.receivingCountry == null &&
-                    parent.checkIfNeighbor(Board.sendingCountry.getName(), this.getName()) &&
-                    Board.sendingCountry.getOwner() == this.getOwner()) {
-            Board.receivingCountry = this;
+        } else if (parent.receivingCountry == null &&
+                    parent.checkIfNeighbor(parent.sendingCountry.getName(), this.getName()) &&
+                parent.sendingCountry.getOwner() == this.getOwner()) {
+            parent.receivingCountry = this;
             parent.openSendArmiesWindow();
+        }
+    }
+
+    // Sets new Soldiers at beginning of turn and switches to other player, when first one is done
+    public void setNewTroops() {
+        if(this.owner == parent.currentPlayer) {
+            this.addSoldiersInside(1);
+            parent.currentPlayer.removeSoldiers(1);
+            soldierLabel.setText("Soldiers: " + this.soldiersInside);
+            parent.currentPhase.setText(parent.phase + " " + parent.currentPlayer.getName() + " " + parent.currentPlayer.getSoldiers() + " Soldier(s)");
+
+            if(parent.currentPlayer == parent.playerOne && parent.playerOne.getSoldiers() == 0 && parent.playerTwo.getSoldiers() != 0) {
+                parent.currentPlayer = parent.playerTwo;
+                parent.turn = parent.currentPlayer.getName() + "'s Turn";
+                parent.playerTurn.setText(parent.turn);
+                parent.currentPhase.setText(parent.phase + " " + parent.currentPlayer.getName() + " " + parent.currentPlayer.getSoldiers() + " Soldier(s)");
+            }
+            else if(parent.currentPlayer == parent.playerTwo && parent.playerTwo.getSoldiers() == 0 && parent.playerOne.getSoldiers() != 0) {
+                parent.currentPlayer = parent.playerOne;
+                parent.turn = parent.currentPlayer.getName() + "'s Turn";
+                parent.playerTurn.setText(parent.turn);
+                parent.currentPhase.setText(parent.phase + " " + parent.currentPlayer.getName() + " " + parent.currentPlayer.getSoldiers() + " Soldier(s)");
+            }
+            else if(parent.playerOne.getSoldiers() == 0 && parent.playerTwo.getSoldiers() == 0) {
+                parent.currentPlayer = parent.currentPlayer == parent.playerOne ? parent.playerTwo : parent.playerOne;
+                parent.turn = parent.currentPlayer.getName() + "'s Turn";
+                parent.playerTurn.setText(parent.turn);
+                parent.phase = "Attack Phase";
+                parent.currentPhase.setText(parent.phase);
+            }
         }
     }
 
@@ -230,48 +266,23 @@ public class Country implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isLeftMouseButton(e)) {
 
-            if(Board.phase.equals("Set Soldiers") && (this.owner == null || this.owner == Board.currentPlayer)) {
+            if(parent.phase.equals("Set Soldiers") && (this.owner == null || this.owner == parent.currentPlayer)) {
                 placeSoldiers();
             }
-            else if(Board.phase.equals("Attack Phase")){
+            else if(parent.phase.equals("Attack Phase")){
                 attackPhase();
             }
-            else if (Board.phase.equals("Player One: Set Soldiers") && this.getOwner() == Board.playerOne) {
+            else if (parent.phase.equals("Player One: Set Soldiers") && this.getOwner() == parent.playerOne) {
                 playerOneSetCardTroops();
             }
-            else if (Board.phase.equals("Player Two: Set Soldiers") && this.getOwner() == Board.playerTwo) {
+            else if (parent.phase.equals("Player Two: Set Soldiers") && this.getOwner() == parent.playerTwo) {
                 playerTwoSetCardTroops();
             }
-            else if (Board.phase.equals("Fortification Phase")) {
+            else if (parent.phase.equals("Fortification Phase")) {
                 fortification();
             }
-            else if (Board.phase.equals("New Troops Phase")) {
-                if(this.owner == Board.currentPlayer) {
-                    this.addSoldiersInside(1);
-                    Board.currentPlayer.removeSoldiers(1);
-                    soldierLabel.setText("Soldiers: " + this.soldiersInside);
-                    Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
-
-                    if(Board.currentPlayer == Board.playerOne && Board.playerOne.getSoldiers() == 0 && Board.playerTwo.getSoldiers() != 0) {
-                        Board.currentPlayer = Board.playerTwo;
-                        Board.turn = Board.currentPlayer.getName() + "'s Turn";
-                        Board.playerTurn.setText(Board.turn);
-                        Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
-                    }
-                    else if(Board.currentPlayer == Board.playerTwo && Board.playerTwo.getSoldiers() == 0 && Board.playerOne.getSoldiers() != 0) {
-                        Board.currentPlayer = Board.playerOne;
-                        Board.turn = Board.currentPlayer.getName() + "'s Turn";
-                        Board.playerTurn.setText(Board.turn);
-                        Board.currentPhase.setText(Board.phase + " " + Board.currentPlayer.getName() + " " + Board.currentPlayer.getSoldiers() + " Soldier(s)");
-                    }
-                    else if(Board.playerOne.getSoldiers() == 0 && Board.playerTwo.getSoldiers() == 0) {
-                        Board.currentPlayer = Board.currentPlayer == Board.playerOne ? Board.playerTwo : Board.playerOne;
-                        Board.turn = Board.currentPlayer.getName() + "'s Turn";
-                        Board.playerTurn.setText(Board.turn);
-                        Board.phase = "Attack Phase";
-                        Board.currentPhase.setText(Board.phase);
-                    }
-                }
+            else if (parent.phase.equals("New Troops Phase")) {
+                setNewTroops();
             }
         }
 
