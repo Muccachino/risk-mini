@@ -217,7 +217,7 @@ public class Country implements MouseListener {
         if(parent.sendingCountry == null && this.getSoldiersInside() > 1) {
             parent.sendingCountry = this;
             this.panel.setBackground(Color.MAGENTA);
-        } else if (parent.sendingCountry.getName().equals(this.getName())) {
+        } else if (parent.sendingCountry != null && parent.sendingCountry.getName().equals(this.getName())) {
             parent.sendingCountry = null;
             if (parent.currentPlayer == parent.playerOne) {
                 this.panel.setBackground(Color.YELLOW);
@@ -225,6 +225,7 @@ public class Country implements MouseListener {
                 this.panel.setBackground(Color.PINK);
             }
         } else if (parent.receivingCountry == null &&
+                    parent.sendingCountry != null &&
                     parent.checkIfNeighbor(parent.sendingCountry.getName(), this.getName()) &&
                 parent.sendingCountry.getOwner() == this.getOwner()) {
             parent.receivingCountry = this;
